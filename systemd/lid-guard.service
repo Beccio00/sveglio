@@ -1,0 +1,29 @@
+[Unit]
+Description=lid-guard: built-in screen and input devices off while the lid is closed
+Documentation=https://github.com/Beccio00/sveglio
+# Give up after 5 failures within 2 minutes (e.g. a broken configuration file).
+StartLimitIntervalSec=120
+StartLimitBurst=5
+
+[Service]
+Type=simple
+ExecStart=@SBINDIR@/lid-guard
+Restart=on-failure
+RestartSec=5
+
+# lid-guard only needs to read /proc and /dev/input, write /sys/class/backlight and talk
+# to logind over the system bus (a unix socket). Everything else is locked down.
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+PrivateNetwork=yes
+RestrictAddressFamilies=AF_UNIX
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+RestrictSUIDSGID=yes
+RestrictNamespaces=yes
+LockPersonality=yes
+
+[Install]
+WantedBy=multi-user.target

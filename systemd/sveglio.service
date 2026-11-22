@@ -1,0 +1,14 @@
+[Unit]
+Description=sveglio: keep the laptop awake with the lid closed
+Documentation=https://github.com/Beccio00/sveglio
+
+[Service]
+Type=simple
+# Battery guard threshold in percent (0 disables it).
+# Change it with: systemctl --user edit sveglio
+Environment=SVEGLIO_BATTERY_THRESHOLD=15
+# systemd-inhibit takes the "handle-lid-switch" inhibitor lock, then runs sveglio-watch:
+# the lock lasts exactly as long as sveglio-watch does.
+ExecStart=systemd-inhibit --what=handle-lid-switch --who=sveglio --why="Keeping the laptop awake with the lid closed" --mode=block @LIBEXECDIR@/sveglio-watch
+
+# No [Install] section on purpose: sveglio starts only with "sveglio on", never at login.

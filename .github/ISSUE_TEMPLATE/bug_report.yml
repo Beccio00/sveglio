@@ -1,0 +1,56 @@
+name: Bug report
+description: Something doesn't work as expected
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a problem! The [Good to know](https://github.com/Beccio00/sveglio#good-to-know) section of the README may already answer it.
+        **Security problems:** please don't open an issue, see [SECURITY.md](https://github.com/Beccio00/sveglio/blob/main/SECURITY.md).
+  - type: textarea
+    id: problem
+    attributes:
+      label: What happened?
+      description: What did you do, what did you expect, and what happened instead?
+    validations:
+      required: true
+  - type: input
+    id: laptop
+    attributes:
+      label: Laptop model
+      placeholder: e.g. Lenovo ThinkPad X1 Carbon Gen 11
+    validations:
+      required: true
+  - type: input
+    id: distro
+    attributes:
+      label: Distribution and version
+      placeholder: e.g. Fedora 41
+    validations:
+      required: true
+  - type: input
+    id: desktop
+    attributes:
+      label: Desktop environment or compositor
+      placeholder: e.g. GNOME 47, KDE Plasma 6.2, COSMIC, sway
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: sveglio version
+      description: Output of `sveglio --version`
+  - type: textarea
+    id: devices
+    attributes:
+      label: Output of `lid-guard --list`
+      description: Remove anything personal, such as your name in Bluetooth device names.
+      render: text
+  - type: textarea
+    id: logs
+    attributes:
+      label: Status and logs
+      description: >
+        Output of `sveglio status`, `systemd-inhibit --list`, `journalctl -b -u lid-guard`
+        and `journalctl --user -b -u sveglio`.
+      render: text

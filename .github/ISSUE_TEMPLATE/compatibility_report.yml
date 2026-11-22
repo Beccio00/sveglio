@@ -1,0 +1,54 @@
+name: Compatibility report
+description: Tell us whether sveglio works on your laptop (it helps even if everything works!)
+labels: ["compatibility"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks! Reports like this one are how sveglio learns about new hardware.
+        To test: run `sveglio on`, close the lid for a minute, then open it.
+  - type: input
+    id: laptop
+    attributes:
+      label: Laptop model
+      placeholder: e.g. Framework Laptop 13 (AMD Ryzen 7040)
+    validations:
+      required: true
+  - type: input
+    id: distro
+    attributes:
+      label: Distribution and version
+      placeholder: e.g. Arch Linux, Ubuntu 24.04
+    validations:
+      required: true
+  - type: input
+    id: desktop
+    attributes:
+      label: Desktop environment or compositor
+      placeholder: e.g. GNOME 47, KDE Plasma 6.2, COSMIC, sway
+    validations:
+      required: true
+  - type: checkboxes
+    id: works
+    attributes:
+      label: What works?
+      description: Tick everything that works on your laptop.
+      options:
+        - label: The laptop stays awake with the lid closed
+        - label: The session is locked when I open the lid
+        - label: The built-in screen is off while the lid is closed
+        - label: "`journalctl -u lid-guard` shows the built-in keyboard and touchpad as blocked"
+        - label: With `sveglio off`, closing the lid suspends the laptop as usual
+  - type: textarea
+    id: devices
+    attributes:
+      label: Output of `lid-guard --list`
+      description: Remove anything personal, such as your name in Bluetooth device names.
+      render: text
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: Anything else?
+      description: Devices that should (not) be blocked, odd behaviour, log excerpts...

@@ -1,0 +1,87 @@
+#!/usr/bin/env bash
+# SPDX-License-Identifier: MIT
+#
+# sveglio: keep your laptop awake with the lid closed.
+# https://github.com/Beccio00/sveglio
+set -euo pipefail
+
+VERSION=0.1.0
+UNIT=sveglio.service
+
+usage() {
+  cat <<'EOF'
+Usage: sveglio [on | off | status]
+
+  on        keep the laptop awake when the lid is closed
+  off       back to normal: closing the lid suspends the laptop
+  status    show the current state (default)
+
+  -h, --help    show this help
+  --version     show the version
+EOF
+}
+
+is_on() {
+  systemctl --user is-active --quiet "$UNIT"
+}
+
+battery_threshold() {
+  local threshold
+  threshold=$(systemctl --user show "$UNIT" -p Environment --value |
+    sed -n 's/.*SVEGLIO_BATTERY_THRESHOLD=\([0-9]*\).*/\1/p') || true
+  echo "${threshold:-15}"
+}
+
+show_status() {
+  if is_on; then
+    echo "sveglio: ON since $(systemctl --user show "$UNIT" -p ActiveEnterTimestamp --value)"
+    echo "  lid closed -> the laptop stays awake and the session is locked"
+    local threshold
+    threshold=$(battery_threshold)
+    if ((threshold > 0)); then
+      echo "  on battery at ${threshold}% -> sveglio turns itself off and the laptop suspends"
+    fi
+  else
+    echo "sveglio: off (closing the lid suspends the laptop as usual)"
+  fi
+  if systemctl is-active --quiet lid-guard.service; then
+    echo "lid-guard: running (built-in screen and input devices are off while the lid is closed)"
+  else
+    echo "lid-guard: NOT running, check with: systemctl status lid-guard"
+  fi
+}
+
+turn_on() {
+  if is_on; then
+    show_status
+    return
+  fi
+  if ! systemctl --user start "$UNIT"; then
+    echo "Could not start $UNIT. Just installed? Run: systemctl --user daemon-reload" >&2
+    exit 1
+  fi
+  # systemd-inhibit exits at once if logind refuses the lock, and sveglio-watch exits at
+  # once if the battery is already below the threshold.
+  sleep 1
+  if ! is_on; then
+    echo "sveglio stopped right after starting. Last log lines:" >&2
+    journalctl --user -u "$UNIT" -n 10 --no-pager -o cat >&2 || true
+    exit 1
+  fi
+  show_status
+}
+
+case "${1:-status}" in
+  on) turn_on ;;
+  off)
+    systemctl --user stop "$UNIT"
+    show_status
+    ;;
+  status) show_status ;;
+  -h | --help | help) usage ;;
+  --version | version) echo "sveglio $VERSION" ;;
+  *)
+    usage >&2
+    exit 2
+    ;;
+esac
